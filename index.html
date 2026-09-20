@@ -13,6 +13,7 @@
     --text:#e6edf3;
     --muted:#8b949e;
     --border:#30363d;
+    --accent-coach:#58a6ff;
   }
   *{box-sizing:border-box;}
   body{
@@ -32,7 +33,7 @@
     background:var(--card);
     border:1px solid var(--border);
     border-radius:20px;
-    padding:26px 22px 30px;
+    padding:24px 22px 28px;
     text-align:center;
     box-shadow:0 20px 60px rgba(0,0,0,0.5);
   }
@@ -40,7 +41,7 @@
     font-size:16px;
     letter-spacing:1.5px;
     color:var(--muted);
-    margin:0 0 16px;
+    margin:0 0 14px;
     font-weight:600;
   }
   .phase-label{
@@ -62,7 +63,7 @@
     position:relative;
     width:100%;
     max-width:360px;
-    height:240px;
+    height:230px;
     margin:0 auto 12px;
     border-radius:14px;
     overflow:hidden;
@@ -100,7 +101,7 @@
     gap:4px;
   }
   .exercise-media-container .rest-display{
-    font-size:64px;
+    font-size:60px;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -109,20 +110,20 @@
     gap:8px;
   }
   .rest-subtext{
-    font-size:14px;
+    font-size:13px;
     font-weight:600;
     color:var(--muted);
     letter-spacing:1px;
   }
 
   .exercise-name{font-size:20px;font-weight:600;margin-bottom:6px;min-height:26px;}
-  .exercise-desc{font-size:13px;color:var(--muted);margin-bottom:14px;min-height:18px;}
+  .exercise-desc{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:18px;}
 
   .timer{
-    font-size:68px;
+    font-size:66px;
     font-weight:700;
     font-variant-numeric:tabular-nums;
-    margin-bottom:16px;
+    margin-bottom:14px;
     line-height:1;
     transition:color .3s;
   }
@@ -132,7 +133,7 @@
     display:flex;
     justify-content:center;
     gap:6px;
-    margin-bottom:20px;
+    margin-bottom:18px;
     flex-wrap:wrap;
   }
   .dot{
@@ -142,11 +143,12 @@
   }
   .dot.done{background:var(--accent-rest);}
   .dot.active{background:var(--accent-work);transform:scale(1.3);}
-  .controls{display:flex;gap:10px;justify-content:center;margin-bottom:16px;}
+  
+  .controls{display:flex;gap:10px;justify-content:center;margin-bottom:14px;}
   button{
     border:none;
     border-radius:12px;
-    padding:12px 22px;
+    padding:11px 20px;
     font-size:15px;
     font-weight:600;
     cursor:pointer;
@@ -157,9 +159,71 @@
   #startBtn{background:var(--accent-work);color:#fff;}
   #pauseBtn{background:var(--border);color:var(--text);}
   #resetBtn{background:transparent;color:var(--muted);border:1px solid var(--border);}
-  .footer-controls{margin-bottom:10px;font-size:13px;color:var(--muted);}
+  
+  /* Coach Voice Bar */
+  .coach-section{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+  }
+  .coach-btn{
+    background:rgba(88,166,255,0.15);
+    color:var(--accent-coach);
+    border:1px solid rgba(88,166,255,0.3);
+    font-size:13px;
+    padding:8px 16px;
+    border-radius:20px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .coach-btn.active{
+    background:var(--accent-coach);
+    color:#0d1117;
+    border-color:var(--accent-coach);
+    box-shadow:0 0 14px rgba(88,166,255,0.4);
+  }
+  .pulse-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:currentColor;
+    display:inline-block;
+  }
+  .coach-btn.active .pulse-dot{
+    animation:pulse 1.2s infinite;
+  }
+  @keyframes pulse{
+    0%{transform:scale(0.8);opacity:0.6;}
+    50%{transform:scale(1.4);opacity:1;}
+    100%{transform:scale(0.8);opacity:0.6;}
+  }
+
+  .coach-bubble{
+    margin-top:10px;
+    font-size:13px;
+    min-height:36px;
+    background:rgba(0,0,0,0.25);
+    border-radius:10px;
+    padding:8px 12px;
+    color:var(--text);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:all .2s;
+  }
+  .coach-bubble.hearing{
+    border-color:var(--accent-coach);
+    color:var(--accent-coach);
+  }
+
+  .footer-controls{margin-top:12px;font-size:13px;color:var(--muted);}
   .footer-controls label{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
-  .up-next{font-size:13px;color:var(--muted);}
+  .up-next{font-size:13px;color:var(--muted);margin-top:8px;}
   .up-next b{color:var(--text);}
 
   /* Modal for full guide picture preview */
@@ -237,6 +301,18 @@
     <button id="pauseBtn" disabled>Pause</button>
     <button id="resetBtn">Reset</button>
   </div>
+
+  <!-- Voice Coach UI -->
+  <div class="coach-section">
+    <button class="coach-btn" id="coachBtn" type="button">
+      <span class="pulse-dot"></span>
+      <span id="coachBtnText">🎙️ Enable Voice Coach</span>
+    </button>
+    <div class="coach-bubble" id="coachBubble">
+      <span>💬 Say "done", "next", or "skip rest" mid-set</span>
+    </div>
+  </div>
+
   <div class="footer-controls">
     <label><input type="checkbox" id="soundToggle" checked /> Sound (whistle each interval)</label>
   </div>
@@ -345,6 +421,10 @@ const upNext = document.getElementById("upNext");
 const mediaContainer = document.getElementById("mediaContainer");
 const overlayHint = document.getElementById("overlayHint");
 
+const coachBtn = document.getElementById("coachBtn");
+const coachBtnText = document.getElementById("coachBtnText");
+const coachBubble = document.getElementById("coachBubble");
+
 const guideModal = document.getElementById("guideModal");
 const modalImg = document.getElementById("modalImg");
 const modalTitle = document.getElementById("modalTitle");
@@ -426,6 +506,25 @@ function updateMedia(seg) {
   }
 }
 
+function advanceSet() {
+  playWhistle();
+  idx++;
+  switchedSide = false;
+  if (idx >= sequence.length) {
+    stop();
+    renderDone();
+    return;
+  }
+  timeLeft = sequence[idx].duration;
+  render();
+}
+
+function skipRest() {
+  if (sequence[idx].type === "break") {
+    advanceSet();
+  }
+}
+
 function render() {
   const seg = sequence[idx];
   phaseLabel.textContent = seg.type === "work" ? "WORK" : "REST";
@@ -489,17 +588,10 @@ function tick() {
   if (timeLeft <= 3 && timeLeft > 0) playTick();
 
   if (timeLeft <= 0) {
-    playWhistle();
-    idx++;
-    switchedSide = false;
-    if (idx >= sequence.length) {
-      stop();
-      renderDone();
-      return;
-    }
-    timeLeft = sequence[idx].duration;
+    advanceSet();
+  } else {
+    render();
   }
-  render();
 }
 
 function start() {
@@ -555,6 +647,152 @@ document.addEventListener("keydown", (e) => {
 startBtn.addEventListener("click", start);
 pauseBtn.addEventListener("click", pause);
 resetBtn.addEventListener("click", reset);
+
+/* ================= VOICE COACH INTEGRATION ================= */
+let recognition = null;
+let isCoachListening = false;
+const COACH_API_URL = window.location.origin.includes("github.io")
+  ? "https://small-llamas-visit.loca.lt/api/coach"
+  : "/api/coach";
+
+function speakCoach(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.1;
+  utter.pitch = 1.0;
+  window.speechSynthesis.speak(utter);
+}
+
+function setCoachStatus(text, hearing = false) {
+  coachBubble.textContent = text;
+  if (hearing) {
+    coachBubble.classList.add("hearing");
+  } else {
+    coachBubble.classList.remove("hearing");
+  }
+}
+
+async function handleTranscript(transcript) {
+  setCoachStatus(`Heard: "${transcript}"...`, true);
+
+  const seg = sequence[idx];
+  const payload = {
+    transcript,
+    context: {
+      exercise: seg.name,
+      phase: seg.type,
+      secondsLeft: timeLeft
+    }
+  };
+
+  try {
+    const res = await fetch(COACH_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (errData.error && errData.error.includes("GEMINI_API_KEY")) {
+        // Friendly local fallback if server hasn't set GEMINI_API_KEY yet
+        handleLocalFallback(transcript);
+        return;
+      }
+      throw new Error(errData.error || "Proxy error");
+    }
+
+    const { action, reply } = await res.json();
+    setCoachStatus(`Coach: "${reply}"`);
+    speakCoach(reply);
+
+    if (action === "advance") {
+      advanceSet();
+    } else if (action === "skip_rest") {
+      skipRest();
+    }
+  } catch (err) {
+    console.warn("Coach backend unavailable, using smart local listener:", err);
+    handleLocalFallback(transcript);
+  }
+}
+
+function handleLocalFallback(transcript) {
+  const lower = transcript.toLowerCase();
+  if (lower.includes("done") || lower.includes("finish") || lower.includes("next") || lower.includes("that's it")) {
+    setCoachStatus('Coach: "Good work. Next exercise!"');
+    speakCoach("Good work. Next exercise!");
+    advanceSet();
+  } else if (lower.includes("skip") || lower.includes("ready") || lower.includes("go")) {
+    if (sequence[idx].type === "break") {
+      setCoachStatus('Coach: "Skipping rest. Let\'s move!"');
+      speakCoach("Skipping rest. Let's move!");
+      skipRest();
+    } else {
+      setCoachStatus('Coach: "Keep pushing! You got this."');
+      speakCoach("Keep pushing! You got this.");
+    }
+  } else {
+    setCoachStatus(`Coach: "Stay focused. Keep breathing!"`);
+    speakCoach("Stay focused. Keep breathing!");
+  }
+}
+
+function initSpeech() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    alert("Speech recognition is not supported in this browser. Try Chrome or Edge!");
+    return null;
+  }
+  const rec = new SpeechRec();
+  rec.continuous = true;
+  rec.interimResults = false;
+  rec.lang = "en-US";
+
+  rec.onresult = (evt) => {
+    const text = evt.results[evt.results.length - 1][0].transcript.trim();
+    if (text) handleTranscript(text);
+  };
+
+  rec.onerror = (e) => {
+    if (e.error !== "no-speech") {
+      console.warn("Speech error:", e.error);
+    }
+  };
+
+  rec.onend = () => {
+    if (isCoachListening) {
+      try { rec.start(); } catch (e) {}
+    }
+  };
+
+  return rec;
+}
+
+coachBtn.addEventListener("click", () => {
+  if (!recognition) {
+    recognition = initSpeech();
+    if (!recognition) return;
+  }
+
+  if (isCoachListening) {
+    isCoachListening = false;
+    recognition.stop();
+    coachBtn.classList.remove("active");
+    coachBtnText.textContent = "🎙️ Enable Voice Coach";
+    setCoachStatus('💬 Say "done", "next", or "skip rest" mid-set');
+  } else {
+    isCoachListening = true;
+    try {
+      recognition.start();
+    } catch (err) {}
+    coachBtn.classList.add("active");
+    coachBtnText.textContent = "🎙️ Voice Coach Active";
+    setCoachStatus("Listening hands-free... Say 'done' or 'next'");
+    speakCoach("Voice coach online. Let's get to work.");
+  }
+});
 
 renderReady();
 </script>

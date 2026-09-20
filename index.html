@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cardio Burst — 10 Min Circuit Timer</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --card:#161b22;
+    --accent-work:#ff5c5c;
+    --accent-rest:#3ddc97;
+    --text:#e6edf3;
+    --muted:#8b949e;
+    --border:#30363d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at top,#1a2233,var(--bg) 60%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .app{
+    width:100%;
+    max-width:460px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:26px 22px 30px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  h1{
+    font-size:16px;
+    letter-spacing:1.5px;
+    color:var(--muted);
+    margin:0 0 16px;
+    font-weight:600;
+  }
+  .phase-label{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:1.5px;
+    padding:4px 14px;
+    border-radius:20px;
+    margin-bottom:12px;
+    transition:all .3s;
+  }
+  .phase-label.work{background:rgba(255,92,92,.15);color:var(--accent-work);}
+  .phase-label.rest{background:rgba(61,220,151,.15);color:var(--accent-rest);}
+  .phase-label.ready{background:rgba(139,148,158,.15);color:var(--muted);}
+  .phase-label.done{background:rgba(255,215,0,.15);color:#ffd700;}
+
+  .exercise-media-container{
+    position:relative;
+    width:100%;
+    max-width:360px;
+    height:240px;
+    margin:0 auto 12px;
+    border-radius:14px;
+    overflow:hidden;
+    background:#0d1117;
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .exercise-media-container img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+    transition:transform .3s ease;
+  }
+  .exercise-media-container:hover img{
+    transform:scale(1.03);
+  }
+  .exercise-media-container .overlay-hint{
+    position:absolute;
+    bottom:8px;
+    right:8px;
+    background:rgba(13,17,23,0.85);
+    color:var(--text);
+    font-size:11px;
+    padding:3px 8px;
+    border-radius:6px;
+    border:1px solid var(--border);
+    pointer-events:none;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .exercise-media-container .rest-display{
+    font-size:64px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent-rest);
+    gap:8px;
+  }
+  .rest-subtext{
+    font-size:14px;
+    font-weight:600;
+    color:var(--muted);
+    letter-spacing:1px;
+  }
+
+  .exercise-name{font-size:20px;font-weight:600;margin-bottom:6px;min-height:26px;}
+  .exercise-desc{font-size:13px;color:var(--muted);margin-bottom:14px;min-height:18px;}
+
+  .timer{
+    font-size:68px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+    margin-bottom:16px;
+    line-height:1;
+    transition:color .3s;
+  }
+  .timer.work{color:var(--accent-work);}
+  .timer.rest{color:var(--accent-rest);}
+  .progress{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--border);
+    transition:background .3s, transform .3s;
+  }
+  .dot.done{background:var(--accent-rest);}
+  .dot.active{background:var(--accent-work);transform:scale(1.3);}
+  .controls{display:flex;gap:10px;justify-content:center;margin-bottom:16px;}
+  button{
+    border:none;
+    border-radius:12px;
+    padding:12px 22px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:opacity .2s, transform .1s;
+  }
+  button:active{transform:scale(.96);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  #startBtn{background:var(--accent-work);color:#fff;}
+  #pauseBtn{background:var(--border);color:var(--text);}
+  #resetBtn{background:transparent;color:var(--muted);border:1px solid var(--border);}
+  .footer-controls{margin-bottom:10px;font-size:13px;color:var(--muted);}
+  .footer-controls label{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
+  .up-next{font-size:13px;color:var(--muted);}
+  .up-next b{color:var(--text);}
+
+  /* Modal for full guide picture preview */
+  .modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.85);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    backdrop-filter:blur(4px);
+  }
+  .modal.open{display:flex;}
+  .modal-content{
+    position:relative;
+    max-width:92vw;
+    max-height:90vh;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.8);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .modal-content img{
+    max-width:100%;
+    max-height:78vh;
+    object-fit:contain;
+    border-radius:10px;
+  }
+  .modal-close{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:rgba(255,255,255,0.1);
+    color:var(--text);
+    border:none;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+  .modal-title{
+    margin:10px 0 0;
+    font-size:16px;
+    font-weight:600;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Cardio Burst</h1>
+  <div class="phase-label ready" id="phaseLabel">READY</div>
+  
+  <div class="exercise-media-container" id="mediaContainer" title="Click to enlarge guide">
+    <div id="exerciseIcon"></div>
+    <div class="overlay-hint" id="overlayHint">🔍 Tap to enlarge</div>
+  </div>
+
+  <div class="exercise-name" id="exerciseName">Jog / Jumping Jacks</div>
+  <div class="exercise-desc" id="exerciseDesc">Land softly on balls of feet, pump arms rhythmically</div>
+  <div class="timer" id="timerDisplay">1:00</div>
+  <div class="progress" id="progressDots"></div>
+  <div class="controls">
+    <button id="startBtn">Start</button>
+    <button id="pauseBtn" disabled>Pause</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+  <div class="footer-controls">
+    <label><input type="checkbox" id="soundToggle" checked /> Sound (whistle each interval)</label>
+  </div>
+  <div class="up-next" id="upNext"></div>
+</div>
+
+<!-- Modal for full size view -->
+<div class="modal" id="guideModal">
+  <div class="modal-content">
+    <button class="modal-close" id="modalCloseBtn">✕</button>
+    <img id="modalImg" src="" alt="Exercise Technique Guide" />
+    <div class="modal-title" id="modalTitle"></div>
+  </div>
+</div>
+
+<script>
+const workBlocks = [
+  { 
+    name: "Jog / Jumping Jacks", 
+    image: "images/jumping_jacks.jpg",
+    desc: "Start feet together, jump wide while raising arms overhead",
+    duration: 60 
+  },
+  { 
+    name: "Squats", 
+    image: "images/squats.jpg", 
+    desc: "Hips back, thighs parallel to floor, weight on heels",
+    duration: 60 
+  },
+  { 
+    name: "Push-ups", 
+    image: "images/pushups.jpg", 
+    desc: "Straight body line from head to heels, elbows at 45°",
+    duration: 60 
+  },
+  { 
+    name: "Wall Sits", 
+    image: "images/wallsits.jpg", 
+    desc: "Back flat against wall, knees bent at 90° over ankles",
+    duration: 60 
+  },
+  { 
+    name: "Sit-ups / Crunches", 
+    image: "images/situps.jpg", 
+    desc: "Engage core, curl shoulders toward knees without pulling neck",
+    duration: 60 
+  },
+  { 
+    name: "Plank", 
+    image: "images/plank.jpg", 
+    desc: "Elbows under shoulders, rigid core line, avoid sagging hips",
+    duration: 60 
+  },
+  { 
+    name: "Side Plank (R → L)", 
+    image: "images/sideplank.jpg", 
+    desc: "Stack feet and hips, hold straight diagonal body line",
+    duration: 60, 
+    sideSwitch: true 
+  },
+  { 
+    name: "High Knees", 
+    image: "images/highknees.jpg", 
+    desc: "Drive knees up to hip height at a fast, steady cadence",
+    duration: 60 
+  },
+  { 
+    name: "Jog / Jumping Jacks (Cooldown)", 
+    image: "images/jumping_jacks.jpg", 
+    desc: "Gentle rhythm to lower heart rate smoothly",
+    duration: 60 
+  },
+];
+
+const sequence = [];
+workBlocks.forEach((b, i) => {
+  sequence.push({ ...b, type: "work" });
+  if (i < workBlocks.length - 1) {
+    sequence.push({ 
+      name: "Rest", 
+      image: null, 
+      desc: "Catch your breath, shake out muscles & hydrate",
+      duration: 10, 
+      type: "break" 
+    });
+  }
+});
+
+let idx = 0;
+let timeLeft = sequence[0].duration;
+let timerId = null;
+let audioCtx = null;
+let switchedSide = false;
+
+const phaseLabel = document.getElementById("phaseLabel");
+const exerciseIcon = document.getElementById("exerciseIcon");
+const exerciseName = document.getElementById("exerciseName");
+const exerciseDesc = document.getElementById("exerciseDesc");
+const timerDisplay = document.getElementById("timerDisplay");
+const progressDots = document.getElementById("progressDots");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+const soundToggle = document.getElementById("soundToggle");
+const upNext = document.getElementById("upNext");
+const mediaContainer = document.getElementById("mediaContainer");
+const overlayHint = document.getElementById("overlayHint");
+
+const guideModal = document.getElementById("guideModal");
+const modalImg = document.getElementById("modalImg");
+const modalTitle = document.getElementById("modalTitle");
+const modalCloseBtn = document.getElementById("modalCloseBtn");
+
+const workIndexes = sequence.map((s, i) => (s.type === "work" ? i : -1)).filter(i => i !== -1);
+workIndexes.forEach(() => {
+  const d = document.createElement("div");
+  d.className = "dot";
+  progressDots.appendChild(d);
+});
+const dots = [...progressDots.children];
+
+function updateDots() {
+  const currentWorkPos = workIndexes.indexOf(idx);
+  dots.forEach((d, i) => {
+    d.classList.remove("active", "done");
+    if (currentWorkPos !== -1 && i === currentWorkPos) d.classList.add("active");
+    else if (i < currentWorkPos || (currentWorkPos === -1 && workIndexes[i] < idx)) d.classList.add("done");
+  });
+}
+
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+function tone(freqStart, freqEnd, t0, dur, gainPeak) {
+  const ctx = getCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(freqStart, t0);
+  osc.frequency.linearRampToValueAtTime(freqEnd, t0 + dur * 0.7);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainPeak, t0 + dur * 0.15);
+  gain.gain.linearRampToValueAtTime(0, t0 + dur);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.02);
+}
+
+function playWhistle() {
+  if (!soundToggle.checked) return;
+  const now = getCtx().currentTime;
+  tone(1100, 2100, now, 0.16, 0.35);
+  tone(1100, 2100, now + 0.22, 0.16, 0.35);
+}
+function playTick() {
+  if (!soundToggle.checked) return;
+  tone(700, 700, getCtx().currentTime, 0.05, 0.15);
+}
+function playSwitchCue() {
+  if (!soundToggle.checked) return;
+  tone(500, 900, getCtx().currentTime, 0.12, 0.25);
+}
+
+function fmt(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+
+function updateMedia(seg) {
+  if (seg.image) {
+    exerciseIcon.innerHTML = `<img src="${seg.image}" alt="${seg.name}">`;
+    overlayHint.style.display = "flex";
+    mediaContainer.style.cursor = "pointer";
+  } else {
+    exerciseIcon.innerHTML = `
+      <div class="rest-display">
+        <span>💤</span>
+        <span class="rest-subtext">REST & BREATHE</span>
+      </div>`;
+    overlayHint.style.display = "none";
+    mediaContainer.style.cursor = "default";
+  }
+}
+
+function render() {
+  const seg = sequence[idx];
+  phaseLabel.textContent = seg.type === "work" ? "WORK" : "REST";
+  phaseLabel.className = "phase-label " + (seg.type === "work" ? "work" : "rest");
+  
+  updateMedia(seg);
+  
+  const currentTitle = seg.sideSwitch ? (switchedSide ? "Side Plank — Left" : "Side Plank — Right") : seg.name;
+  exerciseName.textContent = currentTitle;
+  exerciseDesc.textContent = seg.sideSwitch ? (switchedSide ? "Switch sides: support on left arm" : "Hold strong on right arm, prepare to switch at halfway") : (seg.desc || "");
+  
+  timerDisplay.textContent = fmt(timeLeft);
+  timerDisplay.className = "timer " + (seg.type === "work" ? "work" : "rest");
+  const nextSeg = sequence[idx + 1];
+  upNext.innerHTML = nextSeg ? `Up next: <b>${nextSeg.name}</b>` : `<b>Final stretch — almost done!</b>`;
+  updateDots();
+}
+
+function renderReady() {
+  const seg = sequence[idx];
+  phaseLabel.textContent = "READY";
+  phaseLabel.className = "phase-label ready";
+  
+  updateMedia(seg);
+  
+  exerciseName.textContent = seg.sideSwitch ? "Side Plank — Right" : seg.name;
+  exerciseDesc.textContent = seg.desc || "";
+  timerDisplay.textContent = fmt(timeLeft);
+  timerDisplay.className = "timer";
+  const nextSeg = sequence[idx + 1];
+  upNext.innerHTML = nextSeg ? `Up next: <b>${nextSeg.name}</b>` : "";
+  updateDots();
+}
+
+function renderDone() {
+  phaseLabel.textContent = "DONE";
+  phaseLabel.className = "phase-label done";
+  exerciseIcon.innerHTML = `
+    <div class="rest-display">
+      <span>🎉</span>
+      <span class="rest-subtext" style="color:#ffd700;">WORKOUT COMPLETED</span>
+    </div>`;
+  overlayHint.style.display = "none";
+  mediaContainer.style.cursor = "default";
+  exerciseName.textContent = "Workout Complete!";
+  exerciseDesc.textContent = "Fantastic job! 10 minutes of pure cardio crushed.";
+  timerDisplay.textContent = "0:00";
+  timerDisplay.className = "timer";
+  upNext.textContent = "Nice work. Hit Reset to go again.";
+  dots.forEach(d => { d.classList.remove("active"); d.classList.add("done"); });
+}
+
+function tick() {
+  timeLeft--;
+  const seg = sequence[idx];
+
+  if (seg.sideSwitch && !switchedSide && seg.duration - timeLeft === 30) {
+    switchedSide = true;
+    playSwitchCue();
+  }
+  if (timeLeft <= 3 && timeLeft > 0) playTick();
+
+  if (timeLeft <= 0) {
+    playWhistle();
+    idx++;
+    switchedSide = false;
+    if (idx >= sequence.length) {
+      stop();
+      renderDone();
+      return;
+    }
+    timeLeft = sequence[idx].duration;
+  }
+  render();
+}
+
+function start() {
+  getCtx();
+  startBtn.disabled = true;
+  pauseBtn.disabled = false;
+  timerId = setInterval(tick, 1000);
+  render();
+}
+function pause() {
+  clearInterval(timerId);
+  startBtn.disabled = false;
+  pauseBtn.disabled = true;
+}
+function stop() {
+  clearInterval(timerId);
+  startBtn.disabled = false;
+  pauseBtn.disabled = true;
+}
+function reset() {
+  stop();
+  idx = 0;
+  switchedSide = false;
+  timeLeft = sequence[0].duration;
+  renderReady();
+}
+
+// Modal zoom handlers
+mediaContainer.addEventListener("click", () => {
+  const seg = sequence[idx];
+  if (!seg.image) return;
+  modalImg.src = seg.image;
+  modalTitle.textContent = `${seg.name} — Technique & Form Guide`;
+  guideModal.classList.add("open");
+});
+
+modalCloseBtn.addEventListener("click", () => {
+  guideModal.classList.remove("open");
+});
+
+guideModal.addEventListener("click", (e) => {
+  if (e.target === guideModal) {
+    guideModal.classList.remove("open");
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && guideModal.classList.contains("open")) {
+    guideModal.classList.remove("open");
+  }
+});
+
+startBtn.addEventListener("click", start);
+pauseBtn.addEventListener("click", pause);
+resetBtn.addEventListener("click", reset);
+
+renderReady();
+</script>
+</body>
+</html>

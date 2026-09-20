@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cardio Burst — 10 Min Circuit Timer</title>
+<title>Cardio Burst & Custom Circuit — Smart AI Workout</title>
 <style>
   :root{
     --bg:#0d1117;
@@ -14,6 +14,7 @@
     --muted:#8b949e;
     --border:#30363d;
     --accent-coach:#58a6ff;
+    --accent-custom:#a371f7;
   }
   *{box-sizing:border-box;}
   body{
@@ -29,21 +30,69 @@
   }
   .app{
     width:100%;
-    max-width:460px;
+    max-width:480px;
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:20px;
-    padding:24px 22px 28px;
+    border-radius:22px;
+    padding:24px 20px 28px;
     text-align:center;
     box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    position:relative;
   }
-  h1{
-    font-size:16px;
-    letter-spacing:1.5px;
+
+  /* Workout Switcher Tabs */
+  .mode-tabs{
+    display:flex;
+    background:#0d1117;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:4px;
+    gap:4px;
+    margin-bottom:18px;
+  }
+  .mode-tab{
+    flex:1;
+    border:none;
+    background:transparent;
     color:var(--muted);
-    margin:0 0 14px;
+    font-size:13px;
     font-weight:600;
+    padding:8px 10px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all .2s;
   }
+  .mode-tab.active{
+    background:var(--card);
+    color:var(--text);
+    box-shadow:0 2px 8px rgba(0,0,0,0.4);
+    border:1px solid var(--border);
+  }
+  .mode-tab.custom.active{
+    color:var(--accent-custom);
+  }
+
+  /* Subheader & Edit Button */
+  .custom-actions{
+    display:none;
+    margin-bottom:12px;
+    justify-content:center;
+    gap:8px;
+  }
+  .custom-actions.visible{display:flex;}
+  .btn-sm{
+    padding:6px 14px;
+    font-size:12px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:rgba(163,113,247,0.12);
+    color:var(--accent-custom);
+    cursor:pointer;
+    font-weight:600;
+    transition:all .2s;
+  }
+  .btn-sm:hover{background:rgba(163,113,247,0.25);}
+
   .phase-label{
     display:inline-block;
     font-size:13px;
@@ -62,10 +111,10 @@
   .exercise-media-container{
     position:relative;
     width:100%;
-    max-width:360px;
+    max-width:380px;
     height:230px;
     margin:0 auto 12px;
-    border-radius:14px;
+    border-radius:16px;
     overflow:hidden;
     background:#0d1117;
     border:1px solid var(--border);
@@ -101,13 +150,21 @@
     gap:4px;
   }
   .exercise-media-container .rest-display{
-    font-size:60px;
+    font-size:64px;
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
     color:var(--accent-rest);
     gap:8px;
+  }
+  .exercise-media-container .custom-icon-display{
+    font-size:72px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:var(--accent-custom);
   }
   .rest-subtext{
     font-size:13px;
@@ -120,7 +177,7 @@
   .exercise-desc{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:18px;}
 
   .timer{
-    font-size:66px;
+    font-size:68px;
     font-weight:700;
     font-variant-numeric:tabular-nums;
     margin-bottom:14px;
@@ -160,39 +217,50 @@
   #pauseBtn{background:var(--border);color:var(--text);}
   #resetBtn{background:transparent;color:var(--muted);border:1px solid var(--border);}
   
-  /* Coach Voice Bar */
-  .coach-section{
-    margin-top:14px;
+  /* Conversational AI Coach Section */
+  .coach-container{
+    margin-top:16px;
     padding-top:14px;
     border-top:1px solid var(--border);
+    text-align:left;
   }
-  .coach-btn{
-    background:rgba(88,166,255,0.15);
+  .coach-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .coach-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--accent-coach);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .coach-mic-toggle{
+    background:rgba(88,166,255,0.12);
     color:var(--accent-coach);
     border:1px solid rgba(88,166,255,0.3);
-    font-size:13px;
-    padding:8px 16px;
+    font-size:12px;
+    padding:6px 12px;
     border-radius:20px;
     display:inline-flex;
     align-items:center;
-    gap:8px;
+    gap:6px;
     cursor:pointer;
     transition:all .2s;
   }
-  .coach-btn.active{
+  .coach-mic-toggle.active{
     background:var(--accent-coach);
     color:#0d1117;
-    border-color:var(--accent-coach);
     box-shadow:0 0 14px rgba(88,166,255,0.4);
+    font-weight:700;
   }
-  .pulse-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:currentColor;
-    display:inline-block;
+  .pulse-indicator{
+    width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;
   }
-  .coach-btn.active .pulse-dot{
+  .coach-mic-toggle.active .pulse-indicator{
     animation:pulse 1.2s infinite;
   }
   @keyframes pulse{
@@ -201,32 +269,59 @@
     100%{transform:scale(0.8);opacity:0.6;}
   }
 
-  .coach-bubble{
-    margin-top:10px;
-    font-size:13px;
-    min-height:36px;
-    background:rgba(0,0,0,0.25);
-    border-radius:10px;
-    padding:8px 12px;
-    color:var(--text);
+  .coach-dialogue-box{
+    background:#0d1117;
     border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px 12px;
+    min-height:44px;
     display:flex;
-    align-items:center;
-    justify-content:center;
+    flex-direction:column;
     gap:6px;
-    transition:all .2s;
   }
-  .coach-bubble.hearing{
-    border-color:var(--accent-coach);
+  .coach-bubble{
+    font-size:13px;
+    line-height:1.4;
+    color:var(--text);
+  }
+  .coach-bubble.coach-talking{
     color:var(--accent-coach);
   }
+  .user-speech{
+    font-size:11px;
+    color:var(--muted);
+    font-style:italic;
+  }
+  .coach-input-row{
+    display:flex;
+    gap:6px;
+    margin-top:6px;
+  }
+  .coach-input{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 10px;
+    color:var(--text);
+    font-size:12px;
+    outline:none;
+  }
+  .coach-input:focus{border-color:var(--accent-coach);}
+  .coach-send-btn{
+    padding:6px 12px;
+    font-size:12px;
+    border-radius:8px;
+    background:var(--border);
+    color:var(--text);
+  }
 
-  .footer-controls{margin-top:12px;font-size:13px;color:var(--muted);}
+  .footer-controls{margin-top:14px;font-size:13px;color:var(--muted);text-align:center;}
   .footer-controls label{display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;}
-  .up-next{font-size:13px;color:var(--muted);margin-top:8px;}
+  .up-next{font-size:13px;color:var(--muted);margin-top:8px;text-align:center;}
   .up-next b{color:var(--text);}
 
-  /* Modal for full guide picture preview */
+  /* Modals (Guide preview + Custom Workout Builder) */
   .modal{
     display:none;
     position:fixed;
@@ -235,33 +330,35 @@
     z-index:999;
     align-items:center;
     justify-content:center;
-    padding:20px;
-    backdrop-filter:blur(4px);
+    padding:16px;
+    backdrop-filter:blur(5px);
   }
   .modal.open{display:flex;}
   .modal-content{
     position:relative;
-    max-width:92vw;
-    max-height:90vh;
+    width:100%;
+    max-width:480px;
+    max-height:88vh;
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:16px;
-    padding:16px;
+    border-radius:18px;
+    padding:20px;
     box-shadow:0 20px 50px rgba(0,0,0,0.8);
     display:flex;
     flex-direction:column;
-    align-items:center;
+    overflow-y:auto;
   }
   .modal-content img{
     max-width:100%;
-    max-height:78vh;
+    max-height:75vh;
     object-fit:contain;
     border-radius:10px;
+    margin:0 auto;
   }
   .modal-close{
     position:absolute;
-    top:10px;
-    right:10px;
+    top:12px;
+    right:12px;
     background:rgba(255,255,255,0.1);
     color:var(--text);
     border:none;
@@ -276,40 +373,123 @@
     padding:0;
   }
   .modal-title{
-    margin:10px 0 0;
-    font-size:16px;
-    font-weight:600;
+    margin:0 0 14px;
+    font-size:17px;
+    font-weight:700;
+    text-align:left;
+  }
+
+  /* Workout Builder UI */
+  .builder-item{
+    background:#0d1117;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    text-align:left;
+  }
+  .builder-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .builder-input{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 10px;
+    color:var(--text);
+    font-size:13px;
+    outline:none;
+  }
+  .builder-input:focus{border-color:var(--accent-custom);}
+  .builder-input.flex-1{flex:1;}
+  .builder-input.num{width:68px;text-align:center;}
+  .builder-label{font-size:11px;color:var(--muted);margin-bottom:2px;}
+  .builder-tools{
+    display:flex;
+    gap:6px;
+    justify-content:flex-end;
+  }
+  .btn-icon{
+    padding:4px 8px;
+    font-size:11px;
+    border-radius:6px;
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--text);
+  }
+  .btn-icon.delete{color:var(--accent-work);}
+  .builder-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    justify-content:space-between;
+  }
+  .template-select{
+    background:#0d1117;
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:12px;
   }
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>Cardio Burst</h1>
+  <!-- Workout Mode Switcher -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tabPreset">🔥 10-Min Cardio HIIT</button>
+    <button class="mode-tab custom" id="tabCustom">⚡ My Workout</button>
+  </div>
+
+  <!-- Custom Workout Edit Bar -->
+  <div class="custom-actions" id="customActions">
+    <button class="btn-sm" id="editWorkoutBtn">✏️ Edit My Circuit</button>
+    <button class="btn-sm" id="resetCustomBtn">↺ Load Template</button>
+  </div>
+
   <div class="phase-label ready" id="phaseLabel">READY</div>
   
-  <div class="exercise-media-container" id="mediaContainer" title="Click to enlarge guide">
+  <div class="exercise-media-container" id="mediaContainer" title="Click to view technique">
     <div id="exerciseIcon"></div>
-    <div class="overlay-hint" id="overlayHint">🔍 Tap to enlarge</div>
+    <div class="overlay-hint" id="overlayHint">🔍 Tap for guide</div>
   </div>
 
   <div class="exercise-name" id="exerciseName">Jog / Jumping Jacks</div>
   <div class="exercise-desc" id="exerciseDesc">Land softly on balls of feet, pump arms rhythmically</div>
   <div class="timer" id="timerDisplay">1:00</div>
   <div class="progress" id="progressDots"></div>
+  
   <div class="controls">
     <button id="startBtn">Start</button>
     <button id="pauseBtn" disabled>Pause</button>
     <button id="resetBtn">Reset</button>
   </div>
 
-  <!-- Voice Coach UI -->
-  <div class="coach-section">
-    <button class="coach-btn" id="coachBtn" type="button">
-      <span class="pulse-dot"></span>
-      <span id="coachBtnText">🎙️ Enable Voice Coach</span>
-    </button>
-    <div class="coach-bubble" id="coachBubble">
-      <span>💬 Say "done", "next", or "skip rest" mid-set</span>
+  <!-- Real Human-like AI Coach Section -->
+  <div class="coach-container">
+    <div class="coach-header">
+      <div class="coach-title">
+        <span>Coach Alex</span>
+        <span style="font-size:11px;font-weight:400;color:var(--muted);">(AI Personal Trainer)</span>
+      </div>
+      <button class="coach-mic-toggle" id="coachMicBtn" type="button">
+        <span class="pulse-indicator"></span>
+        <span id="coachMicText">🎙️ Voice Chat: OFF</span>
+      </button>
+    </div>
+    <div class="coach-dialogue-box">
+      <div class="user-speech" id="userSpeechDisplay">Speak naturally anytime mid-set or during rest...</div>
+      <div class="coach-bubble" id="coachBubbleDisplay">"Hey! I'm Coach Alex. Work hard today — talk to me if you're struggling, need form tips, or want to skip ahead!"</div>
+      <div class="coach-input-row">
+        <input type="text" class="coach-input" id="coachTextInput" placeholder="Talk to Coach Alex (or speak hands-free)..." />
+        <button class="coach-send-btn" id="coachSendBtn">Send</button>
+      </div>
     </div>
   </div>
 
@@ -319,93 +499,146 @@
   <div class="up-next" id="upNext"></div>
 </div>
 
-<!-- Modal for full size view -->
+<!-- Modal: Guide Picture Preview -->
 <div class="modal" id="guideModal">
   <div class="modal-content">
     <button class="modal-close" id="modalCloseBtn">✕</button>
     <img id="modalImg" src="" alt="Exercise Technique Guide" />
-    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-title" id="modalTitle" style="text-align:center;margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- Modal: Wholly Editable Custom Workout Builder -->
+<div class="modal" id="builderModal">
+  <div class="modal-content">
+    <button class="modal-close" id="builderCloseBtn">✕</button>
+    <div class="modal-title">⚡ Customize My Workout</div>
+    <p style="font-size:12px;color:var(--muted);margin:0 0 14px;text-align:left;">
+      Add, rename, re-time, or reorder any exercises. All changes are saved automatically.
+    </p>
+
+    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;">Load Preset:</span>
+      <select class="template-select" id="templatePicker">
+        <option value="custom">Current Custom Routine</option>
+        <option value="core">Core Crusher (5 min)</option>
+        <option value="lower">Legs & Glutes Burner</option>
+        <option value="tabata">Tabata High Intensity (20s/10s)</option>
+      </select>
+    </div>
+
+    <div id="builderList" style="max-height:50vh;overflow-y:auto;padding-right:4px;">
+      <!-- Exercise editor rows rendered dynamically -->
+    </div>
+
+    <div style="margin-top:8px;">
+      <button class="btn-sm" id="addExerciseBtn" style="width:100%;padding:10px;font-size:13px;">+ Add New Exercise</button>
+    </div>
+
+    <div class="builder-actions">
+      <button class="btn-sm" id="cancelBuilderBtn" style="background:var(--border);color:var(--text);">Cancel</button>
+      <button class="btn-sm" id="saveBuilderBtn" style="background:var(--accent-custom);color:#fff;padding:8px 22px;">Save & Apply Workout</button>
+    </div>
   </div>
 </div>
 
 <script>
-const workBlocks = [
-  { 
-    name: "Jog / Jumping Jacks", 
-    image: "images/jumping_jacks.jpg",
-    desc: "Start feet together, jump wide while raising arms overhead",
-    duration: 60 
-  },
-  { 
-    name: "Squats", 
-    image: "images/squats.jpg", 
-    desc: "Hips back, thighs parallel to floor, weight on heels",
-    duration: 60 
-  },
-  { 
-    name: "Push-ups", 
-    image: "images/pushups.jpg", 
-    desc: "Straight body line from head to heels, elbows at 45°",
-    duration: 60 
-  },
-  { 
-    name: "Wall Sits", 
-    image: "images/wallsits.jpg", 
-    desc: "Back flat against wall, knees bent at 90° over ankles",
-    duration: 60 
-  },
-  { 
-    name: "Sit-ups / Crunches", 
-    image: "images/situps.jpg", 
-    desc: "Engage core, curl shoulders toward knees without pulling neck",
-    duration: 60 
-  },
-  { 
-    name: "Plank", 
-    image: "images/plank.jpg", 
-    desc: "Elbows under shoulders, rigid core line, avoid sagging hips",
-    duration: 60 
-  },
-  { 
-    name: "Side Plank (R → L)", 
-    image: "images/sideplank.jpg", 
-    desc: "Stack feet and hips, hold straight diagonal body line",
-    duration: 60, 
-    sideSwitch: true 
-  },
-  { 
-    name: "High Knees", 
-    image: "images/highknees.jpg", 
-    desc: "Drive knees up to hip height at a fast, steady cadence",
-    duration: 60 
-  },
-  { 
-    name: "Jog / Jumping Jacks (Cooldown)", 
-    image: "images/jumping_jacks.jpg", 
-    desc: "Gentle rhythm to lower heart rate smoothly",
-    duration: 60 
-  },
+/* ================= WORKOUT DEFINITIONS ================= */
+const PRESET_HIIT = [
+  { name: "Jog / Jumping Jacks", image: "images/jumping_jacks.jpg", icon: "🏃", desc: "Start feet together, jump wide while raising arms overhead", duration: 60 },
+  { name: "Squats", image: "images/squats.jpg", icon: "🦵", desc: "Hips back, thighs parallel to floor, weight on heels", duration: 60 },
+  { name: "Push-ups", image: "images/pushups.jpg", icon: "💪", desc: "Straight body line from head to heels, elbows at 45°", duration: 60 },
+  { name: "Wall Sits", image: "images/wallsits.jpg", icon: "🧱", desc: "Back flat against wall, knees bent at 90° over ankles", duration: 60 },
+  { name: "Sit-ups / Crunches", image: "images/situps.jpg", icon: "🔥", desc: "Engage core, curl shoulders toward knees without pulling neck", duration: 60 },
+  { name: "Plank", image: "images/plank.jpg", icon: "🧘", desc: "Elbows under shoulders, rigid core line, avoid sagging hips", duration: 60 },
+  { name: "Side Plank (R → L)", image: "images/sideplank.jpg", icon: "↔️", desc: "Stack feet and hips, hold straight diagonal body line", duration: 60, sideSwitch: true },
+  { name: "High Knees", image: "images/highknees.jpg", icon: "🦶", desc: "Drive knees up to hip height at a fast, steady cadence", duration: 60 },
+  { name: "Jog / Jumping Jacks (Cooldown)", image: "images/jumping_jacks.jpg", icon: "🏃", desc: "Gentle rhythm to lower heart rate smoothly", duration: 60 },
 ];
 
-const sequence = [];
-workBlocks.forEach((b, i) => {
-  sequence.push({ ...b, type: "work" });
-  if (i < workBlocks.length - 1) {
-    sequence.push({ 
-      name: "Rest", 
-      image: null, 
-      desc: "Catch your breath, shake out muscles & hydrate",
-      duration: 10, 
-      type: "break" 
-    });
-  }
-});
+const TEMPLATES = {
+  core: [
+    { name: "Plank Hold", icon: "🧘", duration: 45, rest: 15, desc: "Keep hips locked and belly button drawn in." },
+    { name: "Bicycle Crunches", icon: "🔥", duration: 45, rest: 15, desc: "Opposite elbow to knee, slow & controlled." },
+    { name: "Mountain Climbers", icon: "⛰️", duration: 45, rest: 15, desc: "Drive knees toward chest with high rhythm." },
+    { name: "Side Plank (Right)", icon: "↔️", duration: 30, rest: 10, desc: "Lift hips high off the floor." },
+    { name: "Side Plank (Left)", icon: "↔️", duration: 30, rest: 10, desc: "Squeeze lower obliques to stay steady." },
+    { name: "Hollow Body Hold", icon: "✨", duration: 40, rest: 20, desc: "Lower back pressed firmly into floor." }
+  ],
+  lower: [
+    { name: "Bodyweight Squats", icon: "🦵", duration: 45, rest: 15, desc: "Chest upright, sink deep." },
+    { name: "Reverse Lunges", icon: "🚶", duration: 45, rest: 15, desc: "Step back, 90 degree bends on both knees." },
+    { name: "Wall Sit", icon: "🧱", duration: 45, rest: 15, desc: "Thighs parallel to floor, breathe steadily." },
+    { name: "Glute Bridges", icon: "🍑", duration: 45, rest: 15, desc: "Squeeze glutes hard at the top." },
+    { name: "Calf Raises", icon: "🦶", duration: 45, rest: 15, desc: "Pause at peak contraction." }
+  ],
+  tabata: [
+    { name: "Burpees", icon: "💥", duration: 20, rest: 10, desc: "All out maximum effort!" },
+    { name: "High Knees", icon: "🦶", duration: 20, rest: 10, desc: "Sprint cadence, drive arms." },
+    { name: "Push-ups", icon: "💪", duration: 20, rest: 10, desc: "Fast clean reps." },
+    { name: "Jump Squats", icon: "🚀", duration: 20, rest: 10, desc: "Explode off the ground softly." }
+  ]
+};
 
+// Default custom routine
+let customWorkoutList = [
+  { name: "Jumping Jacks", icon: "🏃", duration: 45, rest: 15, desc: "Warm up heart and shoulders." },
+  { name: "Push-ups", icon: "💪", duration: 45, rest: 15, desc: "Maintain rigid core alignment." },
+  { name: "Air Squats", icon: "🦵", duration: 45, rest: 15, desc: "Full range of motion." },
+  { name: "Plank Hold", icon: "🧘", duration: 45, rest: 15, desc: "Deep steady nasal breathing." }
+];
+
+// Load saved custom routine from localStorage if available
+try {
+  const saved = localStorage.getItem("my_custom_workout");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      customWorkoutList = parsed;
+    }
+  }
+} catch (e) {}
+
+/* ================= STATE & SEQUENCE BUILDER ================= */
+let currentMode = "preset"; // "preset" or "custom"
+let sequence = [];
 let idx = 0;
-let timeLeft = sequence[0].duration;
+let timeLeft = 60;
 let timerId = null;
+let isRunning = false;
 let audioCtx = null;
 let switchedSide = false;
+
+function buildSequence() {
+  sequence = [];
+  if (currentMode === "preset") {
+    PRESET_HIIT.forEach((b, i) => {
+      sequence.push({ ...b, type: "work" });
+      if (i < PRESET_HIIT.length - 1) {
+        sequence.push({ name: "Rest", icon: "💤", image: null, duration: 10, type: "break", desc: "Catch your breath & hydrate" });
+      }
+    });
+  } else {
+    customWorkoutList.forEach((b, i) => {
+      sequence.push({ ...b, type: "work" });
+      const restTime = b.rest !== undefined ? Number(b.rest) : 15;
+      if (restTime > 0 && i < customWorkoutList.length - 1) {
+        sequence.push({ name: "Rest", icon: "💤", image: null, duration: restTime, type: "break", desc: "Catch your breath & prepare for next" });
+      }
+    });
+  }
+  idx = 0;
+  timeLeft = sequence[0] ? sequence[0].duration : 60;
+  switchedSide = false;
+  buildDots();
+}
+
+/* ================= DOM ELEMENTS ================= */
+const tabPreset = document.getElementById("tabPreset");
+const tabCustom = document.getElementById("tabCustom");
+const customActions = document.getElementById("customActions");
+const editWorkoutBtn = document.getElementById("editWorkoutBtn");
+const resetCustomBtn = document.getElementById("resetCustomBtn");
 
 const phaseLabel = document.getElementById("phaseLabel");
 const exerciseIcon = document.getElementById("exerciseIcon");
@@ -421,32 +654,27 @@ const upNext = document.getElementById("upNext");
 const mediaContainer = document.getElementById("mediaContainer");
 const overlayHint = document.getElementById("overlayHint");
 
-const coachBtn = document.getElementById("coachBtn");
-const coachBtnText = document.getElementById("coachBtnText");
-const coachBubble = document.getElementById("coachBubble");
-
 const guideModal = document.getElementById("guideModal");
 const modalImg = document.getElementById("modalImg");
 const modalTitle = document.getElementById("modalTitle");
 const modalCloseBtn = document.getElementById("modalCloseBtn");
 
-const workIndexes = sequence.map((s, i) => (s.type === "work" ? i : -1)).filter(i => i !== -1);
-workIndexes.forEach(() => {
-  const d = document.createElement("div");
-  d.className = "dot";
-  progressDots.appendChild(d);
-});
-const dots = [...progressDots.children];
+const builderModal = document.getElementById("builderModal");
+const builderList = document.getElementById("builderList");
+const builderCloseBtn = document.getElementById("builderCloseBtn");
+const cancelBuilderBtn = document.getElementById("cancelBuilderBtn");
+const saveBuilderBtn = document.getElementById("saveBuilderBtn");
+const addExerciseBtn = document.getElementById("addExerciseBtn");
+const templatePicker = document.getElementById("templatePicker");
 
-function updateDots() {
-  const currentWorkPos = workIndexes.indexOf(idx);
-  dots.forEach((d, i) => {
-    d.classList.remove("active", "done");
-    if (currentWorkPos !== -1 && i === currentWorkPos) d.classList.add("active");
-    else if (i < currentWorkPos || (currentWorkPos === -1 && workIndexes[i] < idx)) d.classList.add("done");
-  });
-}
+const coachMicBtn = document.getElementById("coachMicBtn");
+const coachMicText = document.getElementById("coachMicText");
+const userSpeechDisplay = document.getElementById("userSpeechDisplay");
+const coachBubbleDisplay = document.getElementById("coachBubbleDisplay");
+const coachTextInput = document.getElementById("coachTextInput");
+const coachSendBtn = document.getElementById("coachSendBtn");
 
+/* ================= AUDIO SYNTHESIS & SFX ================= */
 function getCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume();
@@ -490,43 +718,59 @@ function fmt(s) {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
+/* ================= PROGRESS DOTS ================= */
+let workIndexes = [];
+let dots = [];
+
+function buildDots() {
+  progressDots.innerHTML = "";
+  workIndexes = sequence.map((s, i) => (s.type === "work" ? i : -1)).filter(i => i !== -1);
+  workIndexes.forEach(() => {
+    const d = document.createElement("div");
+    d.className = "dot";
+    progressDots.appendChild(d);
+  });
+  dots = [...progressDots.children];
+  updateDots();
+}
+
+function updateDots() {
+  const currentWorkPos = workIndexes.indexOf(idx);
+  dots.forEach((d, i) => {
+    d.classList.remove("active", "done");
+    if (currentWorkPos !== -1 && i === currentWorkPos) d.classList.add("active");
+    else if (i < currentWorkPos || (currentWorkPos === -1 && workIndexes[i] < idx)) d.classList.add("done");
+  });
+}
+
+/* ================= MEDIA & DISPLAY ================= */
 function updateMedia(seg) {
   if (seg.image) {
     exerciseIcon.innerHTML = `<img src="${seg.image}" alt="${seg.name}">`;
     overlayHint.style.display = "flex";
     mediaContainer.style.cursor = "pointer";
-  } else {
+  } else if (seg.type === "break") {
     exerciseIcon.innerHTML = `
       <div class="rest-display">
         <span>💤</span>
-        <span class="rest-subtext">REST & BREATHE</span>
+        <span class="rest-subtext">REST & RECOVER</span>
+      </div>`;
+    overlayHint.style.display = "none";
+    mediaContainer.style.cursor = "default";
+  } else {
+    exerciseIcon.innerHTML = `
+      <div class="custom-icon-display">
+        <span>${seg.icon || "⚡"}</span>
+        <span class="rest-subtext" style="color:var(--accent-custom);margin-top:6px;">CUSTOM WORKOUT</span>
       </div>`;
     overlayHint.style.display = "none";
     mediaContainer.style.cursor = "default";
   }
 }
 
-function advanceSet() {
-  playWhistle();
-  idx++;
-  switchedSide = false;
-  if (idx >= sequence.length) {
-    stop();
-    renderDone();
-    return;
-  }
-  timeLeft = sequence[idx].duration;
-  render();
-}
-
-function skipRest() {
-  if (sequence[idx].type === "break") {
-    advanceSet();
-  }
-}
-
 function render() {
   const seg = sequence[idx];
+  if (!seg) return;
   phaseLabel.textContent = seg.type === "work" ? "WORK" : "REST";
   phaseLabel.className = "phase-label " + (seg.type === "work" ? "work" : "rest");
   
@@ -545,6 +789,7 @@ function render() {
 
 function renderReady() {
   const seg = sequence[idx];
+  if (!seg) return;
   phaseLabel.textContent = "READY";
   phaseLabel.className = "phase-label ready";
   
@@ -565,23 +810,43 @@ function renderDone() {
   exerciseIcon.innerHTML = `
     <div class="rest-display">
       <span>🎉</span>
-      <span class="rest-subtext" style="color:#ffd700;">WORKOUT COMPLETED</span>
+      <span class="rest-subtext" style="color:#ffd700;">WORKOUT COMPLETED!</span>
     </div>`;
   overlayHint.style.display = "none";
   mediaContainer.style.cursor = "default";
-  exerciseName.textContent = "Workout Complete!";
-  exerciseDesc.textContent = "Fantastic job! 10 minutes of pure cardio crushed.";
+  exerciseName.textContent = "Crushed It!";
+  exerciseDesc.textContent = "Incredible effort. You stayed in the fight and finished strong.";
   timerDisplay.textContent = "0:00";
   timerDisplay.className = "timer";
-  upNext.textContent = "Nice work. Hit Reset to go again.";
+  upNext.textContent = "Hit Reset to go again or customize your routine.";
   dots.forEach(d => { d.classList.remove("active"); d.classList.add("done"); });
+}
+
+/* ================= TIMER ENGINE ================= */
+function advanceSet() {
+  playWhistle();
+  idx++;
+  switchedSide = false;
+  if (idx >= sequence.length) {
+    stop();
+    renderDone();
+    return;
+  }
+  timeLeft = sequence[idx].duration;
+  render();
+}
+
+function skipRest() {
+  if (sequence[idx] && sequence[idx].type === "break") {
+    advanceSet();
+  }
 }
 
 function tick() {
   timeLeft--;
   const seg = sequence[idx];
 
-  if (seg.sideSwitch && !switchedSide && seg.duration - timeLeft === 30) {
+  if (seg && seg.sideSwitch && !switchedSide && seg.duration - timeLeft === Math.floor(seg.duration / 2)) {
     switchedSide = true;
     playSwitchCue();
   }
@@ -596,61 +861,193 @@ function tick() {
 
 function start() {
   getCtx();
+  isRunning = true;
   startBtn.disabled = true;
   pauseBtn.disabled = false;
   timerId = setInterval(tick, 1000);
   render();
 }
+
 function pause() {
+  isRunning = false;
   clearInterval(timerId);
   startBtn.disabled = false;
   pauseBtn.disabled = true;
 }
+
 function stop() {
+  isRunning = false;
   clearInterval(timerId);
   startBtn.disabled = false;
   pauseBtn.disabled = true;
 }
+
 function reset() {
   stop();
   idx = 0;
   switchedSide = false;
-  timeLeft = sequence[0].duration;
+  timeLeft = sequence[0] ? sequence[0].duration : 60;
   renderReady();
 }
 
-// Modal zoom handlers
+/* ================= MODE SWITCHING ================= */
+tabPreset.addEventListener("click", () => {
+  if (currentMode === "preset") return;
+  stop();
+  currentMode = "preset";
+  tabPreset.classList.add("active");
+  tabCustom.classList.remove("active");
+  customActions.classList.remove("visible");
+  buildSequence();
+  renderReady();
+});
+
+tabCustom.addEventListener("click", () => {
+  if (currentMode === "custom") return;
+  stop();
+  currentMode = "custom";
+  tabCustom.classList.add("active");
+  tabPreset.classList.remove("active");
+  customActions.classList.add("visible");
+  buildSequence();
+  renderReady();
+});
+
+/* ================= CUSTOM WORKOUT BUILDER ================= */
+function renderBuilderRows() {
+  builderList.innerHTML = "";
+  customWorkoutList.forEach((ex, i) => {
+    const row = document.createElement("div");
+    row.className = "builder-item";
+    row.innerHTML = `
+      <div class="builder-row">
+        <input type="text" class="builder-input" value="${ex.icon || '⚡'}" style="width:42px;text-align:center;" data-field="icon" data-index="${i}" title="Icon / Emoji" />
+        <input type="text" class="builder-input flex-1" value="${ex.name}" data-field="name" data-index="${i}" placeholder="Exercise Name" />
+        <div class="builder-tools">
+          <button class="btn-icon" data-action="up" data-index="${i}" title="Move Up">▲</button>
+          <button class="btn-icon" data-action="down" data-index="${i}" title="Move Down">▼</button>
+          <button class="btn-icon delete" data-action="delete" data-index="${i}" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="builder-row" style="gap:12px;">
+        <div>
+          <div class="builder-label">Work (sec)</div>
+          <input type="number" min="5" max="600" class="builder-input num" value="${ex.duration}" data-field="duration" data-index="${i}" />
+        </div>
+        <div>
+          <div class="builder-label">Rest (sec)</div>
+          <input type="number" min="0" max="300" class="builder-input num" value="${ex.rest !== undefined ? ex.rest : 15}" data-field="rest" data-index="${i}" />
+        </div>
+        <div style="flex:1;">
+          <div class="builder-label">Form Tip / Notes</div>
+          <input type="text" class="builder-input" style="width:100%;" value="${ex.desc || ''}" data-field="desc" data-index="${i}" placeholder="E.g. Squeeze glutes, flat back" />
+        </div>
+      </div>
+    `;
+    builderList.appendChild(row);
+  });
+}
+
+builderList.addEventListener("input", (e) => {
+  const target = e.target;
+  const idx = Number(target.dataset.index);
+  const field = target.dataset.field;
+  if (idx !== undefined && field && customWorkoutList[idx]) {
+    if (field === "duration" || field === "rest") {
+      customWorkoutList[idx][field] = Math.max(0, Number(target.value) || 0);
+    } else {
+      customWorkoutList[idx][field] = target.value;
+    }
+  }
+});
+
+builderList.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const i = Number(btn.dataset.index);
+
+  if (action === "delete") {
+    if (customWorkoutList.length <= 1) {
+      alert("A workout must have at least one exercise!");
+      return;
+    }
+    customWorkoutList.splice(i, 1);
+    renderBuilderRows();
+  } else if (action === "up" && i > 0) {
+    const temp = customWorkoutList[i];
+    customWorkoutList[i] = customWorkoutList[i - 1];
+    customWorkoutList[i - 1] = temp;
+    renderBuilderRows();
+  } else if (action === "down" && i < customWorkoutList.length - 1) {
+    const temp = customWorkoutList[i];
+    customWorkoutList[i] = customWorkoutList[i + 1];
+    customWorkoutList[i + 1] = temp;
+    renderBuilderRows();
+  }
+});
+
+addExerciseBtn.addEventListener("click", () => {
+  customWorkoutList.push({
+    name: "New Exercise",
+    icon: "🔥",
+    duration: 45,
+    rest: 15,
+    desc: "Focus on form and deep breathing."
+  });
+  renderBuilderRows();
+  builderList.scrollTop = builderList.scrollHeight;
+});
+
+templatePicker.addEventListener("change", () => {
+  const chosen = templatePicker.value;
+  if (TEMPLATES[chosen]) {
+    customWorkoutList = JSON.parse(JSON.stringify(TEMPLATES[chosen]));
+    renderBuilderRows();
+  }
+});
+
+editWorkoutBtn.addEventListener("click", () => {
+  renderBuilderRows();
+  builderModal.classList.add("open");
+});
+
+resetCustomBtn.addEventListener("click", () => {
+  renderBuilderRows();
+  builderModal.classList.add("open");
+});
+
+builderCloseBtn.addEventListener("click", () => builderModal.classList.remove("open"));
+cancelBuilderBtn.addEventListener("click", () => builderModal.classList.remove("open"));
+
+saveBuilderBtn.addEventListener("click", () => {
+  try {
+    localStorage.setItem("my_custom_workout", JSON.stringify(customWorkoutList));
+  } catch (e) {}
+  builderModal.classList.remove("open");
+  if (currentMode === "custom") {
+    stop();
+    buildSequence();
+    renderReady();
+  }
+});
+
+/* ================= MODAL IMAGE ZOOM ================= */
 mediaContainer.addEventListener("click", () => {
   const seg = sequence[idx];
-  if (!seg.image) return;
+  if (!seg || !seg.image) return;
   modalImg.src = seg.image;
   modalTitle.textContent = `${seg.name} — Technique & Form Guide`;
   guideModal.classList.add("open");
 });
+modalCloseBtn.addEventListener("click", () => guideModal.classList.remove("open"));
+guideModal.addEventListener("click", (e) => { if (e.target === guideModal) guideModal.classList.remove("open"); });
 
-modalCloseBtn.addEventListener("click", () => {
-  guideModal.classList.remove("open");
-});
-
-guideModal.addEventListener("click", (e) => {
-  if (e.target === guideModal) {
-    guideModal.classList.remove("open");
-  }
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && guideModal.classList.contains("open")) {
-    guideModal.classList.remove("open");
-  }
-});
-
-startBtn.addEventListener("click", start);
-pauseBtn.addEventListener("click", pause);
-resetBtn.addEventListener("click", reset);
-
-/* ================= VOICE COACH INTEGRATION ================= */
+/* ================= TRULY CONVERSATIONAL AI COACH ALEX ================= */
+let chatHistory = [];
 let recognition = null;
 let isCoachListening = false;
+let isThinking = false;
 const COACH_API_URL = window.location.origin.includes("github.io")
   ? "https://small-llamas-visit.loca.lt/api/coach"
   : "/api/coach";
@@ -659,90 +1056,139 @@ function speakCoach(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate = 1.1;
+  
+  // Pick a natural human voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const naturalVoice = voices.find(v => (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Daniel") || v.name.includes("David")) && v.lang.startsWith("en"));
+  if (naturalVoice) utter.voice = naturalVoice;
+  
+  utter.rate = 1.05;
   utter.pitch = 1.0;
   window.speechSynthesis.speak(utter);
 }
 
-function setCoachStatus(text, hearing = false) {
-  coachBubble.textContent = text;
-  if (hearing) {
-    coachBubble.classList.add("hearing");
-  } else {
-    coachBubble.classList.remove("hearing");
-  }
+// Ensure voices are loaded
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 }
 
-async function handleTranscript(transcript) {
-  setCoachStatus(`Heard: "${transcript}"...`, true);
+async function talkToCoach(userMessage) {
+  if (!userMessage || !userMessage.trim()) return;
+  const message = userMessage.trim();
 
-  const seg = sequence[idx];
-  const payload = {
-    transcript,
-    context: {
-      exercise: seg.name,
-      phase: seg.type,
-      secondsLeft: timeLeft
-    }
+  userSpeechDisplay.textContent = `You: "${message}"`;
+  coachBubbleDisplay.textContent = "Coach Alex is listening & thinking...";
+  coachBubbleDisplay.classList.add("coach-talking");
+  isThinking = true;
+
+  const currentSeg = sequence[idx] || {};
+  const context = {
+    exercise: currentSeg.name || "Workout",
+    phase: currentSeg.type || "work",
+    secondsLeft: timeLeft,
+    timerStatus: isRunning ? "running" : "paused"
   };
 
   try {
     const res = await fetch(COACH_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        transcript: message,
+        context,
+        history: chatHistory
+      })
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      if (errData.error && errData.error.includes("GEMINI_API_KEY")) {
-        // Friendly local fallback if server hasn't set GEMINI_API_KEY yet
-        handleLocalFallback(transcript);
+      const err = await res.json().catch(() => ({}));
+      // If server is missing GEMINI_API_KEY, provide conversational local intelligence
+      if (err.error && err.error.includes("GEMINI_API_KEY")) {
+        handleSmartLocalConversation(message, context);
         return;
       }
-      throw new Error(errData.error || "Proxy error");
+      throw new Error(err.error || "Proxy connection issue");
     }
 
     const { action, reply } = await res.json();
-    setCoachStatus(`Coach: "${reply}"`);
+
+    // Update conversation history
+    chatHistory.push({ role: "user", text: message });
+    chatHistory.push({ role: "model", text: reply });
+    if (chatHistory.length > 12) chatHistory = chatHistory.slice(-12);
+
+    coachBubbleDisplay.textContent = `Coach: "${reply}"`;
     speakCoach(reply);
 
-    if (action === "advance") {
-      advanceSet();
-    } else if (action === "skip_rest") {
-      skipRest();
-    }
+    // Execute actions
+    executeCoachAction(action);
   } catch (err) {
-    console.warn("Coach backend unavailable, using smart local listener:", err);
-    handleLocalFallback(transcript);
+    console.warn("Using offline conversational coach fallback:", err);
+    handleSmartLocalConversation(message, context);
+  } finally {
+    isThinking = false;
   }
 }
 
-function handleLocalFallback(transcript) {
-  const lower = transcript.toLowerCase();
-  if (lower.includes("done") || lower.includes("finish") || lower.includes("next") || lower.includes("that's it")) {
-    setCoachStatus('Coach: "Good work. Next exercise!"');
-    speakCoach("Good work. Next exercise!");
+function executeCoachAction(action) {
+  if (action === "advance") {
     advanceSet();
-  } else if (lower.includes("skip") || lower.includes("ready") || lower.includes("go")) {
-    if (sequence[idx].type === "break") {
-      setCoachStatus('Coach: "Skipping rest. Let\'s move!"');
-      speakCoach("Skipping rest. Let's move!");
-      skipRest();
-    } else {
-      setCoachStatus('Coach: "Keep pushing! You got this."');
-      speakCoach("Keep pushing! You got this.");
-    }
-  } else {
-    setCoachStatus(`Coach: "Stay focused. Keep breathing!"`);
-    speakCoach("Stay focused. Keep breathing!");
+  } else if (action === "skip_rest") {
+    skipRest();
+  } else if (action === "pause" && isRunning) {
+    pause();
+  } else if (action === "resume" && !isRunning) {
+    start();
+  } else if (action === "reset") {
+    reset();
   }
 }
 
+/* Warm, empathetic conversational intelligence for local mode & quick responses */
+function handleSmartLocalConversation(msg, ctx) {
+  const lower = msg.toLowerCase();
+  let reply = "";
+  let action = "none";
+
+  if (lower.includes("done") || lower.includes("finish") || lower.includes("next") || lower.includes("that's it")) {
+    reply = "Solid effort! Moving you right to the next exercise. Stay locked in!";
+    action = "advance";
+  } else if (lower.includes("skip") || lower.includes("no break") || lower.includes("ready to go")) {
+    if (ctx.phase === "break") {
+      reply = "Love the fire! Skipping the rest — let's crush this next round!";
+      action = "skip_rest";
+    } else {
+      reply = "Keep pushing the tempo! Don't let your form slip.";
+    }
+  } else if (lower.includes("pause") || lower.includes("wait") || lower.includes("water") || lower.includes("hold on")) {
+    reply = "Clock paused. Catch your breath, grab some water, and say resume when you're set!";
+    action = "pause";
+  } else if (lower.includes("resume") || lower.includes("start") || lower.includes("continue") || lower.includes("back")) {
+    reply = "Let's roll! Timer running — get into position!";
+    action = "resume";
+  } else if (lower.includes("tired") || lower.includes("hurts") || lower.includes("burn") || lower.includes("hard")) {
+    reply = "I feel you! The burn means adaptation. Drop your pace by ten percent, shake out the shoulders, but keep moving!";
+  } else if (lower.includes("form") || lower.includes("knee") || lower.includes("back") || lower.includes("how to")) {
+    reply = `For ${ctx.exercise}, remember: keep your core tight, spine long, and breathe steadily on every single rep!`;
+  } else if (lower.includes("time") || lower.includes("how long")) {
+    reply = `You've got ${ctx.secondsLeft} seconds left on ${ctx.exercise}. Give me your best finish!`;
+  } else {
+    reply = "I'm right here with you! Focus on that rhythm, breathe in through the nose, out through the mouth!";
+  }
+
+  coachBubbleDisplay.textContent = `Coach: "${reply}"`;
+  speakCoach(reply);
+  executeCoachAction(action);
+
+  chatHistory.push({ role: "user", text: msg });
+  chatHistory.push({ role: "model", text: reply });
+}
+
+/* Voice Recognition Hands-free */
 function initSpeech() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
-    alert("Speech recognition is not supported in this browser. Try Chrome or Edge!");
+    alert("Speech recognition isn't supported in this browser. You can still type in the Coach box, or try Google Chrome / Edge!");
     return null;
   }
   const rec = new SpeechRec();
@@ -752,13 +1198,11 @@ function initSpeech() {
 
   rec.onresult = (evt) => {
     const text = evt.results[evt.results.length - 1][0].transcript.trim();
-    if (text) handleTranscript(text);
+    if (text) talkToCoach(text);
   };
 
   rec.onerror = (e) => {
-    if (e.error !== "no-speech") {
-      console.warn("Speech error:", e.error);
-    }
+    if (e.error !== "no-speech") console.warn("Mic warning:", e.error);
   };
 
   rec.onend = () => {
@@ -770,7 +1214,7 @@ function initSpeech() {
   return rec;
 }
 
-coachBtn.addEventListener("click", () => {
+coachMicBtn.addEventListener("click", () => {
   if (!recognition) {
     recognition = initSpeech();
     if (!recognition) return;
@@ -779,21 +1223,46 @@ coachBtn.addEventListener("click", () => {
   if (isCoachListening) {
     isCoachListening = false;
     recognition.stop();
-    coachBtn.classList.remove("active");
-    coachBtnText.textContent = "🎙️ Enable Voice Coach";
-    setCoachStatus('💬 Say "done", "next", or "skip rest" mid-set');
+    coachMicBtn.classList.remove("active");
+    coachMicText.textContent = "🎙️ Voice Chat: OFF";
+    userSpeechDisplay.textContent = "Voice coach paused. Click to talk again anytime.";
   } else {
     isCoachListening = true;
-    try {
-      recognition.start();
-    } catch (err) {}
-    coachBtn.classList.add("active");
-    coachBtnText.textContent = "🎙️ Voice Coach Active";
-    setCoachStatus("Listening hands-free... Say 'done' or 'next'");
-    speakCoach("Voice coach online. Let's get to work.");
+    try { recognition.start(); } catch (err) {}
+    coachMicBtn.classList.add("active");
+    coachMicText.textContent = "🎙️ Voice Chat: LIVE";
+    userSpeechDisplay.textContent = "Listening hands-free... Talk naturally to Coach Alex anytime!";
+    speakCoach("I'm listening! Let's get after it.");
   }
 });
 
+coachSendBtn.addEventListener("click", () => {
+  const txt = coachTextInput.value.trim();
+  if (txt) {
+    talkToCoach(txt);
+    coachTextInput.value = "";
+  }
+});
+
+coachTextInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    coachSendBtn.click();
+  }
+});
+
+/* ================= CONTROLS & INIT ================= */
+startBtn.addEventListener("click", start);
+pauseBtn.addEventListener("click", pause);
+resetBtn.addEventListener("click", reset);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    guideModal.classList.remove("open");
+    builderModal.classList.remove("open");
+  }
+});
+
+buildSequence();
 renderReady();
 </script>
 </body>
